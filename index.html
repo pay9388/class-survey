@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>신학기 학생 기초조사</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #4f7ef7;
+      --primary-dark: #3a65d4;
+      --primary-light: #eef2ff;
+      --surface: #ffffff;
+      --bg: #f4f6fb;
+      --border: #dde3f0;
+      --text: #1e2330;
+      --muted: #6b7a99;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(79,126,247,0.10);
+    }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      max-width: 560px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+
+    /* ── 상단 헤더 ── */
+    .card-header {
+      background: linear-gradient(135deg, var(--primary) 0%, #7b9ff9 100%);
+      padding: 28px 28px 24px;
+      color: #fff;
+    }
+    .card-header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.3px; }
+    .card-header p  { font-size: 0.85rem; opacity: 0.85; margin-top: 6px; }
+
+    /* ── 스텝 인디케이터 ── */
+    .step-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 16px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+    .step-circle {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 700;
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
+    .step-circle.active   { background: var(--primary); color: #fff; }
+    .step-circle.done     { background: #22c55e; color: #fff; }
+    .step-circle.inactive { background: var(--border); color: var(--muted); }
+    .step-label {
+      font-size: 0.78rem; font-weight: 600;
+      transition: color 0.3s;
+    }
+    .step-label.active   { color: var(--primary); }
+    .step-label.done     { color: #22c55e; }
+    .step-label.inactive { color: var(--muted); }
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: var(--border);
+      margin: 0 8px;
+      transition: background 0.3s;
+    }
+    .step-line.done { background: #22c55e; }
+
+    /* ── 폼 영역 ── */
+    .form-body { padding: 24px 28px 28px; }
+
+    .section-title {
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--primary-light);
+    }
+
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .field label .optional {
+      font-size: 0.72rem;
+      font-weight: 400;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+    .field input,
+    .field textarea {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 0.92rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fafbfd;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .field input:focus,
+    .field textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79,126,247,0.12);
+      background: #fff;
+    }
+    .field input.error,
+    .field textarea.error {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239,68,68,0.10);
+    }
+    .field textarea {
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.55;
+    }
+    .field input[type="number"] { -moz-appearance: textfield; }
+    .field input[type="number"]::-webkit-inner-spin-button { display: none; }
+
+    .error-msg {
+      font-size: 0.75rem;
+      color: #ef4444;
+      margin-top: 4px;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+
+    /* ── 버튼 ── */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover  { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled {
+      background: #a5b4fc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-ghost {
+      background: var(--primary-light);
+      color: var(--primary);
+      flex: 0 0 auto;
+      padding: 14px 20px;
+    }
+    .btn-ghost:hover { background: #dde8ff; }
+
+    /* ── 제출 완료 화면 ── */
+    .done-screen {
+      padding: 48px 28px;
+      text-align: center;
+      display: none;
+    }
+    .done-icon {
+      width: 72px; height: 72px;
+      background: #dcfce7;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 2rem;
+    }
+    .done-screen h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
+    .done-screen p  { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── 스피너 ── */
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<script>
+  // ─── Webhook URL ───────────────────────────────────────────────
+  const WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE';
+  // ──────────────────────────────────────────────────────────────
+</script>
+
+<div class="card">
+
+  <!-- 헤더 -->
+  <div class="card-header">
+    <h1>신학기 학생 기초조사</h1>
+    <p>담임선생님이 여러분을 더 잘 이해하기 위한 자료입니다.</p>
+  </div>
+
+  <!-- 스텝 인디케이터 -->
+  <div class="step-bar" id="stepBar">
+    <div class="step-item">
+      <div class="step-circle active" id="circle1">1</div>
+      <span class="step-label active" id="label1">기본정보</span>
+    </div>
+    <div class="step-line" id="line1"></div>
+    <div class="step-item">
+      <div class="step-circle inactive" id="circle2">2</div>
+      <span class="step-label inactive" id="label2">신학기 자료</span>
+    </div>
+  </div>
+
+  <!-- ══ STEP 1 ══ -->
+  <div class="form-body" id="step1">
+    <div class="section-title">기본 정보</div>
+
+    <div class="field">
+      <label for="num">번호</label>
+      <input type="number" id="num" inputmode="numeric" placeholder="예) 12" min="1" max="99" />
+      <div class="error-msg" id="err-num">번호를 입력해주세요.</div>
+    </div>
+
+    <div class="field">
+      <label for="name">이름</label>
+      <input type="text" id="name" placeholder="예) 홍길동" />
+      <div class="error-msg" id="err-name">이름을 입력해주세요.</div>
+    </div>
+
+    <div class="field">
+      <label for="parent1">보호자(부) 휴대폰</label>
+      <input type="tel" id="parent1" inputmode="numeric" placeholder="010-0000-0000" maxlength="13" />
+      <div class="error-msg" id="err-parent1">보호자(부) 휴대폰 번호를 입력해주세요.</div>
+    </div>
+
+    <div class="field">
+      <label for="parent2">보호자(모) 휴대폰</label>
+      <input type="tel" id="parent2" inputmode="numeric" placeholder="010-0000-0000" maxlength="13" />
+      <div class="error-msg" id="err-parent2">보호자(모) 휴대폰 번호를 입력해주세요.</div>
+    </div>
+
+    <div class="field">
+      <label for="myphone">본인 휴대폰</label>
+      <input type="tel" id="myphone" inputmode="numeric" placeholder="010-0000-0000" maxlength="13" />
+      <div class="error-msg" id="err-myphone">본인 휴대폰 번호를 입력해주세요.</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goStep2()">다음 →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 2 ══ -->
+  <div class="form-body hidden" id="step2">
+    <div class="section-title">신학기 기초 자료</div>
+
+    <div class="field">
+      <label for="dream">희망 진로 / 꿈</label>
+      <textarea id="dream" placeholder="장래 희망이나 꿈을 자유롭게 써주세요."></textarea>
+    </div>
+
+    <div class="field">
+      <label for="worry">학교생활에서 걱정되는 것</label>
+      <textarea id="worry" placeholder="학교생활 중 걱정되거나 어려운 점이 있다면 적어주세요."></textarea>
+    </div>
+
+    <div class="field">
+      <label for="friends">친구관계 고민</label>
+      <textarea id="friends" placeholder="친구관계에서 어려운 점이나 바라는 점을 적어주세요."></textarea>
+    </div>
+
+    <div class="field">
+      <label for="health">건강상 주의사항</label>
+      <textarea id="health" placeholder="알레르기, 지병, 복약 등 선생님이 알아야 할 건강 정보를 적어주세요."></textarea>
+    </div>
+
+    <div class="field">
+      <label for="family">가정에서 선생님이 알아줬으면 하는 것</label>
+      <textarea id="family" placeholder="가정 상황 중 선생님께 알리고 싶은 내용을 적어주세요."></textarea>
+    </div>
+
+    <div class="field">
+      <label for="oneword">나를 한 단어로 표현하면</label>
+      <input type="text" id="oneword" placeholder="예) 열정, 조용한 폭풍, 뚝심..." />
+    </div>
+
+    <div class="field">
+      <label for="wish">선생님에게 바라는 점</label>
+      <textarea id="wish" placeholder="담임선생님에게 바라는 점을 자유롭게 적어주세요."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goStep1()">← 이전</button>
+      <button class="btn btn-primary" id="submitBtn" onclick="submitForm()">제출하기</button>
+    </div>
+  </div>
+
+  <!-- ══ 완료 화면 ══ -->
+  <div class="done-screen" id="doneScreen">
+    <div class="done-icon">✅</div>
+    <h2>제출 완료!</h2>
+    <p>조사에 참여해줘서 고마워요.<br>선생님이 잘 읽어볼게요.</p>
+  </div>
+
+</div><!-- /card -->
+
+<script>
+  /* ── 전화번호 자동 하이픈 ── */
+  function formatPhone(input) {
+    input.addEventListener('input', () => {
+      let v = input.value.replace(/\D/g, '');
+      if (v.length <= 3)       input.value = v;
+      else if (v.length <= 7)  input.value = v.slice(0,3) + '-' + v.slice(3);
+      else                     input.value = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11);
+    });
+  }
+  ['parent1','parent2','myphone'].forEach(id => formatPhone(document.getElementById(id)));
+
+  /* ── Step 1 유효성 ── */
+  function validateStep1() {
+    let ok = true;
+    const checks = [
+      { id: 'num',     errId: 'err-num',     test: v => v.trim() !== '' },
+      { id: 'name',    errId: 'err-name',    test: v => v.trim() !== '' },
+      { id: 'parent1', errId: 'err-parent1', test: v => v.trim() !== '' },
+      { id: 'parent2', errId: 'err-parent2', test: v => v.trim() !== '' },
+      { id: 'myphone', errId: 'err-myphone', test: v => v.trim() !== '' },
+    ];
+    checks.forEach(({ id, errId, test }) => {
+      const el  = document.getElementById(id);
+      const err = document.getElementById(errId);
+      if (!test(el.value)) {
+        el.classList.add('error');
+        err.classList.add('show');
+        ok = false;
+      } else {
+        el.classList.remove('error');
+        err.classList.remove('show');
+      }
+    });
+    return ok;
+  }
+
+  /* ── 스텝 이동 ── */
+  function goStep2() {
+    if (!validateStep1()) return;
+    document.getElementById('step1').classList.add('hidden');
+    document.getElementById('step2').classList.remove('hidden');
+    setStepUI(2);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goStep1() {
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step1').classList.remove('hidden');
+    setStepUI(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function setStepUI(step) {
+    const c1 = document.getElementById('circle1');
+    const c2 = document.getElementById('circle2');
+    const l1 = document.getElementById('label1');
+    const l2 = document.getElementById('label2');
+    const ln = document.getElementById('line1');
+
+    if (step === 1) {
+      c1.className = 'step-circle active';  l1.className = 'step-label active';
+      c2.className = 'step-circle inactive'; l2.className = 'step-label inactive';
+      ln.classList.remove('done');
+    } else {
+      c1.className = 'step-circle done';  l1.className = 'step-label done';
+      c2.className = 'step-circle active'; l2.className = 'step-label active';
+      ln.classList.add('done');
+    }
+  }
+
+  /* ── 제출 ── */
+  async function submitForm() {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>제출 중...';
+
+    const payload = {
+      번호:          document.getElementById('num').value.trim(),
+      이름:          document.getElementById('name').value.trim(),
+      보호자1휴대폰: document.getElementById('parent1').value.trim(),
+      보호자2휴대폰: document.getElementById('parent2').value.trim(),
+      본인휴대폰:    document.getElementById('myphone').value.trim(),
+      희망진로:      document.getElementById('dream').value.trim(),
+      걱정되는것:    document.getElementById('worry').value.trim(),
+      친구관계고민:  document.getElementById('friends').value.trim(),
+      건강주의사항:  document.getElementById('health').value.trim(),
+      가정전달사항:  document.getElementById('family').value.trim(),
+      한단어:        document.getElementById('oneword').value.trim(),
+      선생님께바라는점: document.getElementById('wish').value.trim(),
+      제출시각:      new Date().toLocaleString('ko-KR'),
+    };
+
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      showDone();
+    } catch (e) {
+      alert('전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      btn.disabled = false;
+      btn.innerHTML = '제출하기';
+    }
+  }
+
+  function showDone() {
+    document.getElementById('stepBar').classList.add('hidden');
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('doneScreen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
