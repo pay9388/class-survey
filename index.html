@@ -304,6 +304,12 @@
     </div>
 
     <div class="field">
+      <label for="birthday">생년월일</label>
+      <input type="text" id="birthday" inputmode="numeric" placeholder="예) 20130315" maxlength="8" />
+      <div class="error-msg" id="err-birthday">생년월일 8자리를 입력해주세요. (예: 20130315)</div>
+    </div>
+
+    <div class="field">
       <label>성별</label>
       <div class="radio-group" id="genderGroup">
         <label><input type="radio" name="gender" value="남자" /><span>남자</span></label>
@@ -413,9 +419,10 @@
   function validateStep1() {
     let ok = true;
     const checks = [
-      { id: 'num',     errId: 'err-num',     test: v => v.trim() !== '' },
-      { id: 'name',    errId: 'err-name',    test: v => v.trim() !== '' },
-      { id: 'address', errId: 'err-address', test: v => v.trim() !== '' },
+      { id: 'num',      errId: 'err-num',      test: v => v.trim() !== '' },
+      { id: 'name',     errId: 'err-name',     test: v => v.trim() !== '' },
+      { id: 'birthday', errId: 'err-birthday', test: v => /^\d{8}$/.test(v.trim()) },
+      { id: 'address',  errId: 'err-address',  test: v => v.trim() !== '' },
       { id: 'myphone', errId: 'err-myphone', test: v => v.trim() !== '' },
     ];
     checks.forEach(({ id, errId, test }) => {
@@ -505,6 +512,7 @@
     const payload = {
       번호:          document.getElementById('num').value.trim(),
       이름:          document.getElementById('name').value.trim(),
+      생년월일:      document.getElementById('birthday').value.trim(),
       성별:          document.querySelector('input[name="gender"]:checked')?.value ?? '',
       주소:          document.getElementById('address').value.trim(),
       보호자1휴대폰: document.getElementById('parent1').value.trim(),
