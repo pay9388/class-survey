@@ -222,6 +222,40 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .hidden { display: none !important; }
+
+    /* ── 성별 라디오 ── */
+    .radio-group {
+      display: flex;
+      gap: 10px;
+    }
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex: 1;
+      padding: 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: #fafbfd;
+      transition: all 0.2s;
+      margin-bottom: 0;
+    }
+    .radio-group input[type="radio"] { display: none; }
+    .radio-group input[type="radio"]:checked + span {
+      color: var(--primary);
+    }
+    .radio-group label:has(input:checked) {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .radio-group label.error-border {
+      border-color: #ef4444;
+    }
   </style>
 </head>
 <body>
@@ -270,15 +304,24 @@
     </div>
 
     <div class="field">
+      <label>성별</label>
+      <div class="radio-group" id="genderGroup">
+        <label><input type="radio" name="gender" value="남" /><span>남</span></label>
+        <label><input type="radio" name="gender" value="여" /><span>여</span></label>
+      </div>
+      <div class="error-msg" id="err-gender">성별을 선택해주세요.</div>
+    </div>
+
+    <div class="field">
       <label for="parent1">보호자(부) 휴대폰</label>
       <input type="tel" id="parent1" inputmode="numeric" placeholder="010-0000-0000" maxlength="13" />
-      <div class="error-msg" id="err-parent1">보호자(부) 휴대폰 번호를 입력해주세요.</div>
     </div>
 
     <div class="field">
       <label for="parent2">보호자(모) 휴대폰</label>
       <input type="tel" id="parent2" inputmode="numeric" placeholder="010-0000-0000" maxlength="13" />
-      <div class="error-msg" id="err-parent2">보호자(모) 휴대폰 번호를 입력해주세요.</div>
+      <p style="font-size:0.78rem; color:var(--muted); margin-top:6px;">※ 부/모 중 최소 한 분의 번호는 필수로 입력해주세요.</p>
+      <div class="error-msg" id="err-parent">보호자 휴대폰 번호를 최소 하나 입력해주세요.</div>
     </div>
 
     <div class="field">
@@ -346,6 +389,8 @@
 
 </div><!-- /card -->
 
+<p style="text-align:center; font-size:0.88rem; color:var(--muted); margin-top:16px;">Created by Teachercho84</p>
+
 <script>
   /* ── 전화번호 자동 하이픈 ── */
   function formatPhone(input) {
@@ -364,8 +409,6 @@
     const checks = [
       { id: 'num',     errId: 'err-num',     test: v => v.trim() !== '' },
       { id: 'name',    errId: 'err-name',    test: v => v.trim() !== '' },
-      { id: 'parent1', errId: 'err-parent1', test: v => v.trim() !== '' },
-      { id: 'parent2', errId: 'err-parent2', test: v => v.trim() !== '' },
       { id: 'myphone', errId: 'err-myphone', test: v => v.trim() !== '' },
     ];
     checks.forEach(({ id, errId, test }) => {
@@ -380,6 +423,35 @@
         err.classList.remove('show');
       }
     });
+
+    // 성별 검사
+    const genderChecked = document.querySelector('input[name="gender"]:checked');
+    const errGender = document.getElementById('err-gender');
+    const genderLabels = document.querySelectorAll('#genderGroup label');
+    if (!genderChecked) {
+      genderLabels.forEach(l => l.classList.add('error-border'));
+      errGender.classList.add('show');
+      ok = false;
+    } else {
+      genderLabels.forEach(l => l.classList.remove('error-border'));
+      errGender.classList.remove('show');
+    }
+
+    // 보호자 번호 최소 1개 검사
+    const p1 = document.getElementById('parent1');
+    const p2 = document.getElementById('parent2');
+    const errParent = document.getElementById('err-parent');
+    if (!p1.value.trim() && !p2.value.trim()) {
+      p1.classList.add('error');
+      p2.classList.add('error');
+      errParent.classList.add('show');
+      ok = false;
+    } else {
+      p1.classList.remove('error');
+      p2.classList.remove('error');
+      errParent.classList.remove('show');
+    }
+
     return ok;
   }
 
@@ -426,6 +498,7 @@
     const payload = {
       번호:          document.getElementById('num').value.trim(),
       이름:          document.getElementById('name').value.trim(),
+      성별:          document.querySelector('input[name="gender"]:checked')?.value ?? '',
       보호자1휴대폰: document.getElementById('parent1').value.trim(),
       보호자2휴대폰: document.getElementById('parent2').value.trim(),
       본인휴대폰:    document.getElementById('myphone').value.trim(),
