@@ -313,6 +313,12 @@
     </div>
 
     <div class="field">
+      <label for="address">주소</label>
+      <input type="text" id="address" placeholder="예) 경남 창녕군 영산면 영산새싹길13" />
+      <div class="error-msg" id="err-address">주소를 입력해주세요.</div>
+    </div>
+
+    <div class="field">
       <label for="parent1">보호자(부) 휴대폰</label>
       <input type="tel" id="parent1" inputmode="numeric" placeholder="010-0000-0000" maxlength="13" />
     </div>
@@ -409,6 +415,7 @@
     const checks = [
       { id: 'num',     errId: 'err-num',     test: v => v.trim() !== '' },
       { id: 'name',    errId: 'err-name',    test: v => v.trim() !== '' },
+      { id: 'address', errId: 'err-address', test: v => v.trim() !== '' },
       { id: 'myphone', errId: 'err-myphone', test: v => v.trim() !== '' },
     ];
     checks.forEach(({ id, errId, test }) => {
@@ -499,6 +506,7 @@
       번호:          document.getElementById('num').value.trim(),
       이름:          document.getElementById('name').value.trim(),
       성별:          document.querySelector('input[name="gender"]:checked')?.value ?? '',
+      주소:          document.getElementById('address').value.trim(),
       보호자1휴대폰: document.getElementById('parent1').value.trim(),
       보호자2휴대폰: document.getElementById('parent2').value.trim(),
       본인휴대폰:    document.getElementById('myphone').value.trim(),
